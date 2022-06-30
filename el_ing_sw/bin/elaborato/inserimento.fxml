@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="522.0" prefWidth="702.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="elaborato.inserimento_controller">
+   <children>
+      <Label layoutX="81.0" layoutY="14.0" text="dati lavoratore">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="40.0" layoutY="53.0" text="nome" />
+      <Label layoutX="31.0" layoutY="80.0" text="cognome" />
+      <Label layoutX="14.0" layoutY="107.0" text="luogo di nascita" />
+      <Label layoutX="26.0" layoutY="134.0" text="data di nascita" />
+      <Label layoutX="35.0" layoutY="160.0" text="nazionalità" />
+      <TextField fx:id="nome_id" layoutX="106.0" layoutY="49.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="cognome_id" layoutX="107.0" layoutY="76.0" />
+      <TextField fx:id="naz_id" layoutX="106.0" layoutY="156.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="data_n_id" layoutX="106.0" layoutY="130.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="luogo_id" layoutX="106.0" layoutY="103.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="lingua_id" layoutX="106.0" layoutY="287.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="email_id" layoutX="106.0" layoutY="234.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="telefono_id" layoutX="106.0" layoutY="208.0" prefHeight="10.0" prefWidth="150.0" />
+      <TextField fx:id="indirizzo_id" layoutX="106.0" layoutY="182.0" prefHeight="10.0" prefWidth="150.0" />
+      <Label layoutX="25.0" layoutY="343.0" text="automunito" />
+      <Label layoutX="23.0" layoutY="317.0" text="tipo patente" />
+      <Label layoutX="19.0" layoutY="291.0" text="lingue parlate" />
+      <Label layoutX="14.0" layoutY="265.0" text="specializzazione" />
+      <Label layoutX="41.0" layoutY="238.0" text="email" />
+      <Label layoutX="33.0" layoutY="212.0" text="telefono" />
+      <Label layoutX="33.0" layoutY="186.0" text="indirizzo" />
+      <ChoiceBox fx:id="spec_id" layoutX="106.0" layoutY="261.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="auto_id" layoutX="106.0" layoutY="339.0" prefWidth="150.0" />
+      <ChoiceBox fx:id="tipo_patente_id" layoutX="106.0" layoutY="313.0" prefWidth="150.0" />
+      <Button fx:id="invio_dati_db" layoutX="113.0" layoutY="383.0" mnemonicParsing="false" onAction="#inviodati" text="invio" /> <!-- aggiungere l'azione -->
+      <Label layoutX="351.0" layoutY="14.0" text="Persona da contatter in caso di emergenza">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="p_nome_id" layoutX="495.0" layoutY="49.0" />
+      <TextField fx:id="p_email_id" layoutX="495.0" layoutY="130.0" />
+      <TextField fx:id="p_telefono_id" layoutX="495.0" layoutY="103.0" />
+      <TextField fx:id="p_cognome_id" layoutX="495.0" layoutY="76.0" />
+      <Label layoutX="402.0" layoutY="53.0" text="nome" />
+      <Label layoutX="402.0" layoutY="80.0" text="cognome" />
+      <Label layoutX="402.0" layoutY="107.0" text="telefono" />
+      <Label layoutX="402.0" layoutY="134.0" text="email" />
+      <Label layoutX="403.0" layoutY="190.0" text="Disponibilità lavoratore">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="371.0" layoutY="230.0" text="periodo di disponibilità" />
+      <Label layoutX="396.0" layoutY="256.0" text="comune" />
+      <TextField fx:id="periodo_id" layoutX="496.0" layoutY="226.0" />
+      <TextField fx:id="comune_id" layoutX="497.0" layoutY="253.0" />
+   </children>
+</AnchorPane>
