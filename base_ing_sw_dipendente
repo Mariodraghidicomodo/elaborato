@@ -10,7 +10,7 @@ CREATE TABLE dipendenti (
 	telefono VARCHAR(12) CHECK (telefono SIMILAR TO '\+?[0-9]+') 
 	PRIMARY KEY (id_dipendente)
 );
-
+ 
 --potrei anche inserirlo in dipendente
 CREATE TABLE credenziali_accesso(
 	login VARCHAR(30) UNIQUE NOT NULL 
