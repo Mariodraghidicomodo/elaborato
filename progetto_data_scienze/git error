@@ -6,3 +6,5 @@ Everything up-to-date
 
 non dovevo mettere il database, adesso non riesco a fare i commit perchè file troppo grandi , devo capire come eliminare il
 commit e inserire solo i file senza il dataset
+
+- ho risolto facendo undo degli ultimi 3 commit e togliendo da change il data set e mettendolo in gitignore (i 3 vecchi commit erano eda, clena, clean).fatto questo ho fatto 2 commit
