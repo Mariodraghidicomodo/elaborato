@@ -4,3 +4,5 @@ send-pack: unexpected disconnect while reading sideband packet
 fatal: the remote end hung up unexpectedly
 Everything up-to-date
 
+non dovevo mettere il database, adesso non riesco a fare i commit perchè file troppo grandi , devo capire come eliminare il
+commit e inserire solo i file senza il dataset
