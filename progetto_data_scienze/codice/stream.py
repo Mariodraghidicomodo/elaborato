@@ -72,14 +72,13 @@ def name_cards(df):
     return list_name_unique
 
 #serach id for image
-def image(name,df):
-    #serach a id
-    print(name)
-    multiids = df[df.name == name].multiverse_ids #ok adesso il scorro fino a qundo non trovo un multiverse_ids
-    for x in multiids:
-        if len(x)!= 0:
-            return x[0]
-    return f'no image'
+def search_card(name,df):
+    multiids = df[(df.name == name) & (df.multiverse_ids.str.len() != 0)].head(1)
+    if multiids.empty == True:
+        return ['no image',df[df.name == name].head(1)]
+    else:
+        for x in multiids.multiverse_ids:
+            return [x[0],multiids]
 
 #UI
 
@@ -120,21 +119,28 @@ if st.checkbox('Show final data'):
 st.header('Card')
 st.subheader('Search a card')
 
-card = st.selectbox('Insert name of the card',options=name_cards(final_df),index = 10, key='name_card') #find the multiverse_id
+card = st.selectbox('Insert name of the card',options=name_cards(final_df),index = 6, key='name_card') #find the multiverse_id
+list_card_info = search_card(card,final_df)
+#prendo image
 
-image_id = image(card,final_df)
-if  image_id != 'no image':
-    st.image(f'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={image_id}&type=card')
-else:
-    st.write('no image')
+col_img, col_info = st.columns([2, 3])
+with col_img:
+    if  list_card_info[0] != 'no image':
+        st.image(f'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={list_card_info[0]}&type=card',use_column_width="always")
+    else:
+        st.write('no image found')
+with col_info:
+    info = list_card_info[1]
+    #st.write(info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T)
+    st.dataframe(data=info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T, use_container_width=True)
 
 #PLOT
 st.header('Plot')
+
 #SELECT PERIOD
 #with a slider
 st.subheader('Select years')
 start, finish = st.select_slider('Select a range', options=np.arange(1993,2019), value = (1993, 1996)) #period is a variable that i will use in the mask
-
 
 #SELECT ATTRBUTE
 
