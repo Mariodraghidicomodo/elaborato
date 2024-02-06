@@ -72,13 +72,14 @@ def name_cards(df):
     return list_name_unique
 
 #serach id for image
-def search_card(name,df):
-    multiids = df[(df.name == name) & (df.multiverse_ids.str.len() != 0)].head(1)
-    if multiids.empty == True:
-        return ['no image',df[df.name == name].head(1)]
-    else:
-        for x in multiids.multiverse_ids:
-            return [x[0],multiids]
+def search_card(name,df): #rimettere apposto
+    multiids = df[(df.name == name)]
+    #if multiids.empty == True:
+        #return ['no image',df[df.name == name].head(1)]
+    #else:
+        #for x in multiids.multiverse_ids:
+        #    return [x[0],multiids]
+    return ['no image',multiids.head(1)]
 
 #UI
 
@@ -107,12 +108,13 @@ if st.checkbox('Show raw data'):
     data_load_state.text('Done')
 
 if st.checkbox('Show final data'):
-
+    
+    df = final_df
+    df = df.astype(str) #devo farlo altrimneti errore conversione no image con int
+    
     st.subheader('Final data')
     data_load_final_state = st.text('Loading data...')
-    st.write(final_df)
-    #filtered_df = dataframe_explorer(final_df)
-    #st.dataframe(filtered_df, use_container_width=True) #peccato da errore; unhashable type: 'list'; raised when you try to assign a list as a key in a dictionary; The Python TypeError: Unhashable Type: 'List' can be fixed by casting a list to a tuple before using it as a key in a dictionary; or try tu hash a list
+    st.write(df) #Could not convert 'no image' with type str: tried to convert to int64, perchè in multiversid ci sono liste con int e str, quindi uso astype(str)
     data_load_final_state.text('Done')
 
 #SEARCH IMAGE
