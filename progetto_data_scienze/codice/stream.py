@@ -91,18 +91,18 @@ def create_mask_dates(start, finish, df):
     #oppure ritorno una lista di maskere, quindi una lista per anno, in caso potrei raggrupparli per 3 anni
     list_mask=[]
     if finish-start > 10: #raggruppo le mashere per 2 anni
-        for x in range(start, finish, 3):
+        for x in range(start, finish + 1, 3):
             data_start = f'{x}-01-01'
             if x + 2 > finish: #capire, forse è inutile
-                    x = x+((x+2)-finish)
-                    data_end = f'{x}-12-31'
+                x = x+((x+2)-finish)
+                data_end = f'{x}-12-31'
             else:
                 data_end = f'{x+2}-12-31'
             print(data_start,data_end)
             mask = df['released_at'].between(data_start,data_end)
             list_mask.append(mask)
     else : #per anno singolo
-        for x in range(start,finish):
+        for x in range(start,finish + 1):
             data_start = f'{x}-01-01'
             data_end = f'{x}-12-31'
             print(data_start, data_end)
@@ -139,7 +139,9 @@ st.title('MTG Data')
 
 #DATAFRAME!!!
 st.header('Data')
+
 final_df = final_load()
+
 if st.checkbox('Show raw data'):
     #test carico df
     st.subheader('Raw data')
@@ -197,30 +199,35 @@ st.header('Plot')
 st.subheader('Select years')
 start, finish = st.select_slider('Select a range', options=np.arange(1993,2019+1), value = (1993, 1996)) #period is a variable that i will use in the mask
 list_mask_data = create_mask_dates(start, finish, final_df)
+print(list_mask_data)
 
 #SELECT ATTRBUTE
-attribut = st.selectbox(label='Select an attribute', options=['number of card','types','cost of mana','power','toughness','reserved'])
+attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','power','toughness','reserved'])
 
-#plotlista_main_types = create_lista_all_type()
+if attribut == 'number of card': #le date sono sbagliate perche?
+    
+    for x in list_mask_data:
+        
+        fig_nc,ax = plt.subplots(figsize=(20,6))
+        df_data = final_df[x]
+
+        ax = plt.title(f'amount of type from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax =plt.ylabel('amount')
+        ax = plt.xlabel('period')
+        ax = plt.bar(df_data.released_at.value_counts().index,df_data.released_at.value_counts())
+        
+        st.pyplot(fig_nc)
+        
+
 if attribut == 'types':
     
     lista_main_types = create_lista_all_type(final_df)
     
-    #righe = 0
-    #if len(list_mask_data) %2 != 0:
-    #    righe = int(len(list_mask_data)/2+0.5)
-    #    print('righe = ', righe)
-    #else:
-    #    righe = int(len(list_mask_data)/2)
-    #    print('righe = ', righe)
-    #fig, axs = plt.subplots(nrows= righe, ncols=2)
-    #count=0
-    #colonna = 0
-    val = start
     for x in list_mask_data: #prima scorro le date
         
         fig, ax = plt.subplots(figsize=(15,6))
         df_data = final_df[x] #mi salvo il dataframe con la mask data
+        
         list_amount_type = {} #creo dizionario per salvarmi le quantità
         
         for y in lista_main_types: #scorro i vari tipi
@@ -229,25 +236,61 @@ if attribut == 'types':
                 list_amount_type[y] = amount
         
         ax = plt.bar(list_amount_type.keys(),list_amount_type.values())
-        if finish-start>10: #ogni due anni
-            ax = plt.title(f'amount of type from {val}-01-01 to {val + 2}-12-31')
-            val = val + 3
-        else:
-            ax = plt.title(f'amount of type from {val}-01-01 to {val}-12-31')
-            val = val + 1
+        ax = plt.title(f'amount of type from {df_data.released_at.min()} to {df_data.released_at.max()}')
         ax = plt.xlabel('type of cards')
         ax = plt.ylabel('amount')
+        
         st.pyplot(fig)
         
-        #axs[count,colonna].bar(list_amount_type.keys(),list_amount_type.values(), labels = list_amount_type.keys())
-        #if colonna > 0:
-        #    colonna = 0
-        #    count = count + 1
-        #else:
-        #    colonna = colonna + 1
+if attribut == 'general cost of mana':
+    #FARNE UNO PER I COLORI NORMALI B,G,U,R,MULTI,GENERAL
+    for x in list_mask_data: #prima scorro le date
+        
+        fig, ax = plt.subplots(figsize= (15,6))
+        df_data = final_df[x] #mi salvo il dataframe con la mask data
+        
+        #plt.figure(figsize = (15,6)) 
+        ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
+        ax = plt.title(f'general cost of mana from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('general cost of mana')
+        ax = plt.ylabel('amount')
+        if df_data.cmc.max() > 16:
+            ax = plt.xlim(-1, 16)
+        else:
+            ax = plt.xlim(-1, df_data.cmc.max())
+        ax = plt.xticks(np.arange(0,16))
+        
+        st.pyplot(fig)
+        #nel primi 3 anni cercano molte più carte a costo 1
 
+if attribut == 'power':
+    for x in list_mask_data: #prima scorro le date
+        
+        fig, ax = plt.subplots(figsize = (15,6))
+        df_data = final_df[x] #mi salvo il dataframe con la mask data
+        df_data = df_data[df_data.power != 'no power']
+         
+        ax = plt.bar(df_data.power.value_counts().index,df_data.power.value_counts()) #non mi piace sortato
+        ax = plt.title(f'cards power from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('power')
+        ax = plt.ylabel('amount')
+        
+        st.pyplot(fig)
 
-    
+if attribut == 'toughness':
+    for x in list_mask_data: #prima scorro le date
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        df_data = final_df[x] #mi salvo il dataframe con la mask data
+        df_data = df_data[df_data.toughness != 'no toughness']
+        
+        ax = plt.bar(df_data.toughness.value_counts().index,df_data.toughness.value_counts()) #non mi piace sortato
+        ax = plt.title(f'cards power from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('toughness')
+        ax = plt.ylabel('amount')
+
+        st.pyplot(fig)
+        
 
 #vedere tags
 #pip install streamlit-tags
