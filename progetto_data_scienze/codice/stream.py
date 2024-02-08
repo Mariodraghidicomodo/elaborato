@@ -67,12 +67,43 @@ def final_load():
     data = pd.read_json("C:/Users/elped/OneDrive/Desktop/git_vs_code/prova-elab-ing/progetto_data_scienze/codice/final_json.json")
     return data
 
+#@st.cache_data
+#def name_cards(df): # PROVARE A PASSARLE TUTTE, INSIEME ALL'ACRONIMO DEL SET
+#    list_name_unique = df.name.unique()
+#    list_name_unique = df[['name','set_name']]
+#    print(list_name_unique)
+#    return list_name_unique
+
+#SEACH WITH SET
+#def name_cards(df):
+#    list_name = df[['name','set_name']]
+#    list_select_card = []
+#    for x in list_name:
+#        #list_select_card = []
+#        stringa = x.name + ' set: ' + x.set_name
+#        list_select_card.append(stringa)
+
 @st.cache_data
-def name_cards(df):
+def name_cards(df): # PROVARE A PASSARLE TUTTE, INSIEME ALL'ACRONIMO DEL SET
     list_name_unique = df.name.unique()
+    #list_name_unique = df[['name','set_name']]
+    print(list_name_unique)
     return list_name_unique
 
-#serach id for image
+
+#SEARCH 2 id for image AND SET
+#def search_card(name,df): #rimettere apposto
+#    multiids = df[(df.name == name) & (df.multiverse_ids.isin([[-1]]) == False)].head(1) #AIUTO è COME SE IL LA COLONNA MULTIIDS FOSSE DIVENTATA UNA STRINGA NON SO PERCHè, ma può essere che non ha gli scope!!??
+#    print(multiids.multiverse_ids)
+#    if multiids.empty == True:
+#        return ['no image',df[df.name == name].head(1)]
+#    else:
+#        for x in multiids.multiverse_ids:
+#            print(type(x))
+#            return [x[0],multiids]
+#    #return ['no image',multiids.head(1)]
+
+#search id for image
 def search_card(name,df): #rimettere apposto
     multiids = df[(df.name == name) & (df.multiverse_ids.isin([[-1]]) == False)].head(1) #AIUTO è COME SE IL LA COLONNA MULTIIDS FOSSE DIVENTATA UNA STRINGA NON SO PERCHè, ma può essere che non ha gli scope!!??
     print(multiids.multiverse_ids)
@@ -83,7 +114,8 @@ def search_card(name,df): #rimettere apposto
             print(type(x))
             return [x[0],multiids]
     #return ['no image',multiids.head(1)]
-        
+
+
 def create_mask_dates(start, finish, df):
     print(start)
     print(finish)
@@ -132,6 +164,60 @@ def search_row_by_type(search_type, df_view): #ok perfetto, ritorno gli indici c
             #print('bro non so')
     return lista_indici
 
+def count_color_identity(df_search): #futur add dataframe 
+    dizi_coloridentiti =  {'Black':0,'White':0,'Green':0,'Red':0,'Blue':0,'Colorless':0,'Multicolor':0}
+    for x in df_search.color_identity: #x is a list
+        #print(x)
+        if len(x) > 1:
+            dizi_coloridentiti['Multicolor'] += 1
+        #elif len(x) == 0: #attenzione non ho modificato color identity, se non ha nulla posso mettere un acronimo : CL
+        #    dizi_coloridentiti['Colorless'] += 1
+        else:  #len == 1
+            if x[0] == 'B':
+                dizi_coloridentiti['Black'] += 1
+            elif x[0] == 'W':
+                dizi_coloridentiti['White'] += 1
+            elif x[0] == 'G':
+                dizi_coloridentiti['Green'] += 1
+            elif x[0] == 'R':
+                dizi_coloridentiti['Red'] += 1
+            elif x[0] == 'U' :
+                dizi_coloridentiti['Blue'] += 1
+            else: #'no color identity'
+                dizi_coloridentiti['Colorless'] +=1
+    return dizi_coloridentiti
+
+def count_legal_cards(df):
+    lista_formats = {'standard':0,'future':0,'historic':0,'pioneer':0,'modern':0,'legacy':0,'pauper':0,'vintage':0,'penny':0,'commander':0,'brawl':0,'duel':0,'oldschool':0} #conto solo quelle legali, differenza -> non legali
+    for indice,dict_legale in df.legalities.items():
+        #count += 1
+        #print(count)
+        #print(type(legale))
+        for forma,legal in dict_legale.items(): #scorro il dizionario
+            #print(f)
+            if forma in lista_formats:
+                if legal == 'legal':
+                    lista_formats[forma] += 1
+    return lista_formats
+
+def create_lista_subtypes(): #ok perfetto
+    lista_subtypes = []
+    for index,tipo in final_clean_df.subtypes.items():
+        for x in tipo:
+            if x not in lista_subtypes:
+                lista_subtypes.append(x)
+    return lista_subtypes
+
+def count_subtypes(search_subtype): #ok perfetto, lo modifico e ritorno un count, non posso la lista la devo ritrasformare in un dizio
+    lista_indici = []
+    count = 0
+    for index,tipo in final_clean_df.subtypes.items():
+        if search_subtype in tipo:
+            count += 1
+            lista_indici.append(index)
+    return count
+
+
 
 #UI
 
@@ -176,7 +262,9 @@ st.header('Card')
 st.subheader('Search a card')
 
 card = st.selectbox('Insert name of the card',options=name_cards(final_df),index = 6, key='name_card') #find the multiverse_id
-list_card_info = search_card(card,final_df)
+#card = st.selectbox('Insert name of the card',options=list_select_card,index = 6, key='name_card') #find the multiverse_id
+print('card:',card )
+list_card_info = search_card(card,final_df) #PROVARE A MODIFICARE
 
 
 col_img, col_info = st.columns([2, 3])
@@ -202,7 +290,7 @@ list_mask_data = create_mask_dates(start, finish, final_df)
 print(list_mask_data)
 
 #SELECT ATTRBUTE
-attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','power','toughness','reserved'])
+attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','color identity','power','toughness','reserved','legalities','subtypes'])
 
 if attribut == 'number of card': #le date sono sbagliate perche?
     
@@ -290,7 +378,83 @@ if attribut == 'toughness':
         ax = plt.ylabel('amount')
 
         st.pyplot(fig)
+
+if attribut == 'reserved':
+    #diviso per periodo, carte reserved
+    for x in list_mask_data: #prima scorro le date
         
+        fig,ax = plt.subplots(figsize = (15,6))
+        df_data = final_df[x] #mi salvo il dataframe con la mask data
+        
+        ax = plt.title(f'percentage of reserved cards from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        #plt.bar(df_data.reserved.value_counts().index,df_data.reserved.value_counts()) #non mi piace sortato
+        if True in df_data.reserved.value_counts().index:
+            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%') #non posso usare explod nel caso non sia presente un true
+        else:
+            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%') #non posso usare explod nel caso non sia presente un true
+        
+        st.pyplot(fig)
+
+if attribut == 'color identity': #fare la stessa cosa con COLORS
+    
+    for x in list_mask_data:
+        
+        fig,ax = plt.subplots(figsize = (15,6))
+        df_data = final_df[x]
+        count_colorid = count_color_identity(df_data)
+
+        ax = plt.pie(count_colorid.values(), labels=count_colorid.keys(), autopct='%.2f',colors=['Black','White','Green','Red','Blue','Grey','Orange'], pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2))
+        ax = plt.title (f'percentage color identity from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        st.pyplot(fig)
+
+    total = st.checkbox('Total')
+
+    if total:
+        
+        count_colorid = count_color_identity(final_df)
+        
+        fig,ax = plt.subplots(figsize = (6,6))
+        ax = plt.pie(count_colorid.values(), labels=count_colorid.keys(), autopct='%.2f',colors=['Black','White','Green','Red','Blue','Grey','Orange'], pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2))
+       
+        st.pyplot(fig)
+
+if attribut == 'legalities':
+
+    #da finire!!!!!
+
+    total = st.checkbox('Total')
+
+    if total:
+
+        count_legalities = count_legal_cards(final_df)
+
+        fig,ax = plt.subplots(figsize = (6,6))
+        #ax = plt.barh(np.arange(0,13),count_legalities.values())
+        #ax = plt.yticks(np.arange(0,13),count_legalities.keys())
+        ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2))
+        #addlabels_oriz(lista_formats.keys(),list(lista_formats.values()),limite= 3000000)
+        st.pyplot(fig)
+
+#if attribut == 'subtypes':
+
+    #DA FINIRE
+
+    #lista_subtypes = create_lista_subtypes()
+    #lista_subtypes.sort()
+    #lista_subtypes
+
+    #dizi_subtype = {}
+    #for x in lista_subtypes:
+    #    dizi_subtype[x] = search_row_by_subtypes(x)
+    #dizi_subtype
+    #sas = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
+
+
+
+
+
+
+
 
 #vedere tags
 #pip install streamlit-tags
