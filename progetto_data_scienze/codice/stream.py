@@ -13,6 +13,8 @@ import numpy as np
 import time #for test and progress
 #from streamlit_extras.dataframe_explorer import dataframe_explorer
 import matplotlib.pyplot as plt
+import seaborn as sb
+from wordcloud import WordCloud
 
 #df
 #final_df = pd.read_json('final_json.json')
@@ -142,7 +144,7 @@ def create_mask_dates(start, finish, df):
             list_mask.append(mask)
     return list_mask
 
-@st.cache_data
+@st.cache_data #testare con e senza cache
 def create_lista_all_type(df): #ok perfetto
     lista_main_type = []
     for index,tipo in df.types.items():
@@ -150,6 +152,14 @@ def create_lista_all_type(df): #ok perfetto
             if x not in lista_main_type:
                 lista_main_type.append(x)
     return lista_main_type
+
+def create_lista_subtypes(df): #ok perfetto
+    lista_subtypes = []
+    for index,tipo in df.subtypes.items():
+        for x in tipo:
+            if (x not in lista_subtypes) & (x != 'no subtypes'):
+                lista_subtypes.append(x)
+    return lista_subtypes
 
 def search_row_by_type(search_type, df_view): #ok perfetto, ritorno gli indici che hanno il typo idicato
     lista_indici = []
@@ -163,6 +173,20 @@ def search_row_by_type(search_type, df_view): #ok perfetto, ritorno gli indici c
         #except:
             #print('bro non so')
     return lista_indici
+
+def search_row_by_subtypes(search_type, df_view):
+    lista_indici = []
+    count = 0
+    for index,tipo in df_view.subtypes.items():
+        #try:
+            #print(search_type, tipo)
+            if search_type in tipo:
+                count += 1
+                lista_indici.append(index)
+        #except:
+            #print('bro non so')
+    #return lista_indici
+    return count
 
 def count_color_identity(df_search): #futur add dataframe 
     dizi_coloridentiti =  {'Black':0,'White':0,'Green':0,'Red':0,'Blue':0,'Colorless':0,'Multicolor':0}
@@ -200,13 +224,7 @@ def count_legal_cards(df):
                     lista_formats[forma] += 1
     return lista_formats
 
-def create_lista_subtypes(): #ok perfetto
-    lista_subtypes = []
-    for index,tipo in final_clean_df.subtypes.items():
-        for x in tipo:
-            if x not in lista_subtypes:
-                lista_subtypes.append(x)
-    return lista_subtypes
+
 
 def count_subtypes(search_subtype): #ok perfetto, lo modifico e ritorno un count, non posso la lista la devo ritrasformare in un dizio
     lista_indici = []
@@ -279,8 +297,16 @@ with col_info:
     #st.write(info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T)
     st.dataframe(data=info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T, use_container_width=True)
 
+#AGGIUNGERE UN SEARCH IMAGE AVANZATO
+
 #PLOT
 st.header('Plot')
+
+if st.checkbox('Show correlation'):
+    fig,ax = plt.subplots()
+    ax = sb.heatmap(final_df.corr(numeric_only=True))
+    st.pyplot(fig)
+
 
 #SELECT PERIOD
 #with a slider
@@ -290,7 +316,7 @@ list_mask_data = create_mask_dates(start, finish, final_df)
 print(list_mask_data)
 
 #SELECT ATTRBUTE
-attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','color identity','power','toughness','reserved','legalities','subtypes'])
+attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','color identity','power','toughness','reserved','legalities','subtypes','text','artist'])
 
 if attribut == 'number of card': #le date sono sbagliate perche?
     
@@ -329,8 +355,30 @@ if attribut == 'types':
         ax = plt.ylabel('amount')
         
         st.pyplot(fig)
+    
+    total = st.checkbox('Total')
+
+    if total:
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+
+        list_amount_type = {}
+
+        for y in lista_main_types: #scorro i vari tipi
+            amount = len(search_row_by_type(y,df_data))
+            if amount > 0:
+                list_amount_type[y] = amount
         
-if attribut == 'general cost of mana':
+        ax = plt.bar(list_amount_type.keys(),list_amount_type.values())
+        ax = plt.title(f'amount of type from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('type of cards')
+        ax = plt.ylabel('amount')
+
+        st.pyplot(fig)
+
+if attribut == 'general cost of mana': #fare curva di mana (normal distribution)
     #FARNE UNO PER I COLORI NORMALI B,G,U,R,MULTI,GENERAL
     for x in list_mask_data: #prima scorro le date
         
@@ -339,6 +387,7 @@ if attribut == 'general cost of mana':
         
         #plt.figure(figsize = (15,6)) 
         ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
+        #PROVARE A SOSTITUIRE IL BAR CON GLI SCATTER (ES: NORMAL DISTRIBUTION)
         ax = plt.title(f'general cost of mana from {df_data.released_at.min()} to {df_data.released_at.max()}')
         ax = plt.xlabel('general cost of mana')
         ax = plt.ylabel('amount')
@@ -351,6 +400,28 @@ if attribut == 'general cost of mana':
         st.pyplot(fig)
         #nel primi 3 anni cercano molte più carte a costo 1
 
+    total = st.checkbox('Total')
+
+    if total:
+
+        fig,ax = plt.subplots(figsize=(15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+
+        ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
+        #PROVARE A SOSTITUIRE IL BAR CON GLI SCATTER (ES: NORMAL DISTRIBUTION)
+        ax = plt.title(f'general cost of mana from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('general cost of mana')
+        ax = plt.ylabel('amount')
+        if df_data.cmc.max() > 16:
+            ax = plt.xlim(-1, 16)
+        else:
+            ax = plt.xlim(-1, df_data.cmc.max())
+        ax = plt.xticks(np.arange(0,16))
+        
+        st.pyplot(fig)
+        
+
 if attribut == 'power':
     for x in list_mask_data: #prima scorro le date
         
@@ -358,6 +429,22 @@ if attribut == 'power':
         df_data = final_df[x] #mi salvo il dataframe con la mask data
         df_data = df_data[df_data.power != 'no power']
          
+        ax = plt.bar(df_data.power.value_counts().index,df_data.power.value_counts()) #non mi piace sortato
+        ax = plt.title(f'cards power from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('power')
+        ax = plt.ylabel('amount')
+        
+        st.pyplot(fig)
+    
+    total = st.checkbox('Total')
+
+    if total:
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+        df_data = df_data[df_data.power != 'no power']
+
         ax = plt.bar(df_data.power.value_counts().index,df_data.power.value_counts()) #non mi piace sortato
         ax = plt.title(f'cards power from {df_data.released_at.min()} to {df_data.released_at.max()}')
         ax = plt.xlabel('power')
@@ -378,6 +465,23 @@ if attribut == 'toughness':
         ax = plt.ylabel('amount')
 
         st.pyplot(fig)
+    
+    total = st.checkbox('Total')
+
+    if total: 
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+        df_data = df_data[df_data.toughness != 'no toughness']
+
+        ax = plt.bar(df_data.toughness.value_counts().index,df_data.toughness.value_counts()) #non mi piace sortato
+        ax = plt.title(f'cards power from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.xlabel('toughness')
+        ax = plt.ylabel('amount')
+
+        st.pyplot(fig)
+
 
 if attribut == 'reserved':
     #diviso per periodo, carte reserved
@@ -394,6 +498,24 @@ if attribut == 'reserved':
             ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%') #non posso usare explod nel caso non sia presente un true
         
         st.pyplot(fig)
+    
+    total = st.checkbox('Total')
+
+    if total:
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+
+        ax = plt.title(f'percentage of reserved cards from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        #plt.bar(df_data.reserved.value_counts().index,df_data.reserved.value_counts()) #non mi piace sortato
+        if True in df_data.reserved.value_counts().index:
+            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%') #non posso usare explod nel caso non sia presente un true
+        else:
+            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%') #non posso usare explod nel caso non sia presente un true
+        
+        st.pyplot(fig)
+
 
 if attribut == 'color identity': #fare la stessa cosa con COLORS
     
@@ -411,9 +533,13 @@ if attribut == 'color identity': #fare la stessa cosa con COLORS
 
     if total:
         
-        count_colorid = count_color_identity(final_df)
+        fig,ax = plt.subplots(figsize = (15,6))
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
         
-        fig,ax = plt.subplots(figsize = (6,6))
+        count_colorid = count_color_identity(df_data)
+        
+        #fig,ax = plt.subplots(figsize = (6,6))
         ax = plt.pie(count_colorid.values(), labels=count_colorid.keys(), autopct='%.2f',colors=['Black','White','Green','Red','Blue','Grey','Orange'], pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2))
        
         st.pyplot(fig)
@@ -422,11 +548,22 @@ if attribut == 'legalities':
 
     #da finire!!!!!
 
+    for x in list_mask_data:
+
+        fig,ax = plt.subplots(figsize = (15,6))
+        df_data = final_df[x]
+        count_legalities = count_legal_cards(df_data)
+
+        ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True)
+        st.pyplot(fig)
+
     total = st.checkbox('Total')
 
     if total:
 
-        count_legalities = count_legal_cards(final_df)
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+        count_legalities = count_legal_cards(df_data)
 
         fig,ax = plt.subplots(figsize = (6,6))
         #ax = plt.barh(np.arange(0,13),count_legalities.values())
@@ -435,21 +572,131 @@ if attribut == 'legalities':
         #addlabels_oriz(lista_formats.keys(),list(lista_formats.values()),limite= 3000000)
         st.pyplot(fig)
 
-#if attribut == 'subtypes':
+if attribut == 'subtypes':
 
     #DA FINIRE
+    lista_subtypes = create_lista_subtypes(final_df)
+    lista_subtypes.sort()
 
-    #lista_subtypes = create_lista_subtypes()
-    #lista_subtypes.sort()
-    #lista_subtypes
+    for x in list_mask_data:
 
-    #dizi_subtype = {}
-    #for x in lista_subtypes:
-    #    dizi_subtype[x] = search_row_by_subtypes(x)
-    #dizi_subtype
-    #sas = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
+        fig, ax = plt.subplots(figsize=(15,6))
+        df_data = final_df[x]
+        
+        dizi_subtype = {}
 
+        for x in lista_subtypes:
+            dizi_subtype[x] = search_row_by_subtypes(x,df_data)
+        #dizi_subtype
+        #dizi_subtype = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
+        dizi_subtype = dict(sorted(dizi_subtype.items(), key = lambda item: item[1], reverse=True)[0:10])
 
+        ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        st.pyplot(fig)
+
+    total = st.checkbox('Total')
+
+    if total:
+
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+
+        dizi_subtype = {}
+        for x in lista_subtypes:
+            dizi_subtype[x] = search_row_by_subtypes(x,df_data)
+        #dizi_subtype
+        #dizi_subtype = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
+        dizi_subtype = dict(sorted(dizi_subtype.items(), key = lambda item: item[1], reverse=True)[0:10])
+
+        #diz = {}
+        #x = 0
+        #while x < len(dizi_subtype):
+        #    diz[dizi_subtype[x][0]] = dizi_subtype[x][1]
+        #    x +=1
+
+        fig,ax = plt.subplots(figsize=(10,6))
+        ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        st.pyplot(fig)
+
+if attribut == 'text':
+    #allora provo a ricavare le caratterisctiche proncipali 
+    # flying, deathtouch, lifelink, doublestrike, vigilance ecc..
+    #di solito si trovano nella prima riga
+    #testo con un solo testo e poi provo a farlo su altri, forse dovrei creare una lista con le varie caratterisctiche
+    #cerco solo creature
+    for x in list_mask_data:
+
+        fig,ax= plt.subplots(figsize=(20,6))
+        df_data = final_df[x]
+
+        lista_keywords_ability = {'deathtouch':0,'defender':0,'double strike':0,'enchant':0,'equip':0, 'fear':0,'first strike':0, 'flash':0, 'flying':0, 'haste':0, 'hexproof':0, 'indestructible':0, 'landwalk':0,'lifelink':0, 'menace':0, 'protection':0, 'prowess':0, 'reach':0, 'shroud':0, 'trample':0, 'vigilance':0, 'ward':0} #più comuni
+        
+        only_creature = search_row_by_type('Creature',df_data) #OK IN TEORIA GLIIDICI SONO DIVERSI, QUINDI NON POSSO USARE SEARCH_ROW_BY TYPE, cioè si ma non funziona dopo con iloc
+        #st.write(search_row_by_type('Creature',df_data))
+        #st.write(df_data.astype(str))
+        #only_creature_df = df_data.iloc[only_creature] 
+        only_creature_df = df_data[df_data.index.isin(only_creature)] 
+        for chiave in lista_keywords_ability.keys():
+            for indice,testo in only_creature_df.text.items():
+                if chiave in testo.casefold():
+                    lista_keywords_ability[chiave] += 1
+
+        frequence = pd.Series(lista_keywords_ability.values(),index = lista_keywords_ability.keys())
+        word_text = WordCloud().generate_from_frequencies((frequence))
+
+        ax = plt.imshow(word_text, interpolation='bilinear')
+        ax = plt.title(f'frequenci of keywords from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        ax = plt.axis("off")
+        st.pyplot(fig)
+
+    total = st.checkbox('Total')
+
+    if total:
+
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+
+        lista_keywords_ability = {'deathtouch':0,'defender':0,'double strike':0,'enchant':0,'equip':0, 'fear':0,'first strike':0, 'flash':0, 'flying':0, 'haste':0, 'hexproof':0, 'indestructible':0, 'landwalk':0,'lifelink':0, 'menace':0, 'protection':0, 'prowess':0, 'reach':0, 'shroud':0, 'trample':0, 'vigilance':0, 'ward':0} #più comuni
+
+        only_creature = search_row_by_type('Creature',df_data)
+        #only_creature_df = df_data.iloc[only_creature]
+        only_creature_df = df_data[df_data.index.isin(only_creature)]
+        for chiave in lista_keywords_ability.keys():
+            for indice,testo in only_creature_df.text.items():
+                if chiave in testo.casefold():
+                    lista_keywords_ability[chiave] += 1
+        
+        fig,ax = plt.subplots(figsize=(20,6))
+        #ax = plt.bar(lista_keywords_ability.keys(),lista_keywords_ability.values()) #ok bar char orribile
+        #ax = addlabels(lista_keywords_ability.keys(),lista_keywords_ability.values(),limite=30000)
+
+        #provo ad usare worldcloud
+        frequence = pd.Series(lista_keywords_ability.values(),index = lista_keywords_ability.keys())
+        word_text = WordCloud().generate_from_frequencies((frequence))
+
+        ax = plt.imshow(word_text, interpolation='bilinear')
+        ax = plt.axis("off")
+        st.pyplot(fig)
+
+if attribut == 'artist':
+
+    for x in list_mask_data:
+
+        fig,ax= plt.subplots() #capire che grafico usare
+        df_data = final_df[x]
+
+        st.write(f'number od illustration for artist from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        st.write(df_data.artist.value_counts())
+    
+    total = st.checkbox('Total')
+
+    if total: #start and finish totale
+
+        fig,ax = plt.subplots() #capire se inserire grafico
+        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+        df_data = final_df[mask]
+        st.write(f'number od illustration for artist from {df_data.released_at.min()} to {df_data.released_at.max()}')
+        st.write(df_data.artist.value_counts())
 
 
 
