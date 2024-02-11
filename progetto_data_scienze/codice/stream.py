@@ -295,7 +295,7 @@ with col_img:
 with col_info:
     info = list_card_info[1]
     #st.write(info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T)
-    st.dataframe(data=info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T, use_container_width=True)
+    st.dataframe(data=info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices','uuid']].T, use_container_width=True)
 
 #AGGIUNGERE UN SEARCH IMAGE AVANZATO
 
