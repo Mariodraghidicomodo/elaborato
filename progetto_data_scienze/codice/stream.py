@@ -15,6 +15,12 @@ import time #for test and progress
 import matplotlib.pyplot as plt
 import seaborn as sb
 from wordcloud import WordCloud
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+import warnings
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+    
 
 #df
 #final_df = pd.read_json('final_json.json')
@@ -240,9 +246,15 @@ def count_subtypes(search_subtype): #ok perfetto, lo modifico e ritorno un count
 #UI
 
 st.title('MTG Data')
+st.image(image='logo_magic.png', width=550)
+
+st.markdown("""Magic The Gathering (MTG, or just Magic) is a trading card game first published in 1993 by Wizards of the Coast. This game has seen immense popularity and new cards are still released every few months. The strength of different cards in the game can vary wildly and as a result some cards now sell on secondary markets for as high as thousands of dollars.""")
+st.markdown("""Link datasets: https://www.kaggle.com/datasets/mylesoneill/magic-the-gathering-cards/""")
 
 #DATAFRAME!!!
 st.header('Data')
+
+st.markdown("""The final dataset is a collection of all cards printed from 1993 to 2019. Three datasets were utilized: one containing information about individual cards, another for card prices during the 2019 period, and a third containing additional information such as an ID for card visualization.""")
 
 final_df = final_load()
 
@@ -279,6 +291,8 @@ if st.checkbox('Show final data'):
 st.header('Card')
 st.subheader('Search a card')
 
+st.markdown("""With this tool, you can search for the name of a card. On the left, the card's image will be displayed, while on the right, a set of important card details will be shown.""")
+
 card = st.selectbox('Insert name of the card',options=name_cards(final_df),index = 6, key='name_card') #find the multiverse_id
 #card = st.selectbox('Insert name of the card',options=list_select_card,index = 6, key='name_card') #find the multiverse_id
 print('card:',card )
@@ -310,7 +324,10 @@ if st.checkbox('Show correlation'):
 
 #SELECT PERIOD
 #with a slider
-st.subheader('Select years')
+#st.subheader('Select years')
+
+st.markdown("""To visualize the graphs, you need to choose two variables. The first involves selecting the release period of the cards, while the second involves choosing a variable related to the cards. The final result will often be a graph depicting the quantity of cards with the selected variable over the chosen period of time""")
+
 start, finish = st.select_slider('Select a range', options=np.arange(1993,2019+1), value = (1993, 1996)) #period is a variable that i will use in the mask
 list_mask_data = create_mask_dates(start, finish, final_df)
 print(list_mask_data)
@@ -698,6 +715,108 @@ if attribut == 'artist':
         st.write(f'number od illustration for artist from {df_data.released_at.min()} to {df_data.released_at.max()}')
         st.write(df_data.artist.value_counts())
 
+st.subheader('Model')
+
+model = st.checkbox('Show model')
+
+if model:
+
+    #st.write('spiegazione modello, aggiungere cosa può influenzare il prezzo')
+    st.write("""I have decided to implement a prediction model for card price in the project.
+            The main factors influencing their cost are: rarity, legality, reprints, the number
+            of copies the player needs, th condition of the card (not implemented) and 
+            how much the card can impact the game.
+            Unfortunately, some elements that influence the price were not available in 
+            the dataset, so i attempt to include other variables sucha as strenght,
+            costitution, mana cost and release set.""")
+    #codice
+
+    #dataframe con prezzi solo paper
+
+    lista_ind_paper = []
+    for ind in final_df.index:
+        if bool(final_df.prices.iloc[ind]['paper']) == True: #prendo solo quelli che paper, in teoria
+            lista_ind_paper.append(ind)
+    df_prices_paper = final_df.iloc[lista_ind_paper]
+    #ma se creassi una colonna apposta, mi sembra più semplice
+    #creo una serie
+    serie_paper = pd.Series()
+    lista_prezzi_paper = []
+    df_prices_paper.reset_index(inplace=True)
+
+    for ind in df_prices_paper.index:
+        prezzo = df_prices_paper.prices.iloc[ind]['paper']
+        valore_prezzo = prezzo.get('2019-11-09')
+        lista_prezzi_paper.append(valore_prezzo)
+
+    df_prices_paper['price_paper'] = lista_prezzi_paper
+    df_prices_paper_unique = df_prices_paper.drop_duplicates('name')
+    prova_predict = df_prices_paper_unique.copy()
+
+    #from list/dict to string
+    list_colonne_to_string = ['printings','legalities']
+    
+    for x in list_colonne_to_string:
+        stringa = prova_predict[x].astype(str)
+        col=x+'_string'
+        prova_predict[col] = stringa
+    
+    #df per prediction
+    pred = prova_predict[['rarity','price_paper','cmc','power','toughness','reprint','printings_string','set_name','legalities_string','reserved']]
+    #creo a categorical variable for rarity
+    categorical_feature = ['rarity','power','toughness','reserved','reprint','printings_string','legalities_string','set_name'] #ok accetta solo stringhe o numeri, devo trasformare le liste e disct in stringhe
+    le = LabelEncoder()
+
+    #convert the variable to some sort of numerical
+    for i in range(8):
+        new = le.fit_transform(pred[categorical_feature[i]])
+        pred[categorical_feature[i]] = new
+    
+    pred.dropna(inplace=True)
+
+    #training the model
+    column_test = ['rarity','price_paper','cmc','power','toughness','reprint','printings_string','set_name','legalities_string','reserved']
+    X = pred[column_test]
+    y = pred.price_paper
+
+    #splitting data into training and test set
+    X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8,test_size=0.2, random_state=0) #capire test size e random state
+
+    #train the model
+    #regr = RandomForestRegressor(n_estimators=10, max_depth=10, random_state = 101) #capire
+    regr = RandomForestRegressor(n_estimators=100, max_depth=10,  oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
+    regr.fit(X_train, y_train.values.ravel())
+
+    #make prediction
+    warnings.filterwarnings('ignore')
+    predictions = regr.predict(X_test)
+    result = X_test
+    result['paper_price'] = y_test
+    result['prediction'] = predictions.tolist()
+
+    #errori/risultato test
+    #model evaluation
+    mse = mean_squared_error(y_test.values.ravel(), predictions)
+    r2 = r2_score(y_test.values.ravel(), predictions)
+    mae = mean_absolute_error(y_test.values.ravel(), predictions)
+    
+    st.write(result)
+    st.write("Mean square error (MSE):", round(mse, 2))
+    st.write("R2 Score: ", round(r2, 2))
+    st.write("Mean Absolute Error (MAE): ", round(mae, 2))
+    oob_score = regr.oob_score_
+    st.write("Out-of-Bag Score: ", round(oob_score, 2))
+    
+    #grafico
+    #st.write('inserire grafico, CAPIRE SE VA BENE')
+    fig,ax = plt.subplots()
+    #st.write(y_test)
+    #st.write(X_test)
+    sort_result = result.sort_index()[450:500]
+    ax = plt.scatter(sort_result.index,sort_result.paper_price, color='blue')
+    ax = plt.plot(sort_result.index, sort_result.prediction, color = 'red')
+
+    st.pyplot(fig)
 
 
 
