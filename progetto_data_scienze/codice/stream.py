@@ -427,55 +427,66 @@ if attribut == 'general cost of mana': #fare curva di mana (normal distribution)
     #FARNE UNO PER I COLORI NORMALI B,G,U,R,MULTI,GENERAL
     for x in list_mask_data: #prima scorro le date
         
-        fig, ax = plt.subplots(figsize= (15,6))
-        df_data = final_df[x] #mi salvo il dataframe con la mask data
+        #fig, ax = plt.subplots(figsize= (15,6))
+        df_data = final_df[x & (final_df.cmc != 1000000.0)] #mi salvo il dataframe con la mask data
         
-        #plt.figure(figsize = (15,6)) 
-        ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
-        #PROVARE A SOSTITUIRE IL BAR CON GLI SCATTER (ES: NORMAL DISTRIBUTION)
-        
-        if(finish - start > 10):
-            ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-        else:
-            ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]}')
-        ax = plt.xlabel('General cost of mana')
-        ax = plt.ylabel('Amount')
+        prova_ge= df_data.cmc.value_counts().sort_index()
+        #print(prova_ge.sort_index())
 
-        if df_data.cmc.max() > 16:
-            ax = plt.xlim(-1, 16)
+        #ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
+        fig_px = px.line(x = prova_ge.index, y = prova_ge, labels = {'x':'Cost of mana', 'y':'Amount'})
+        #ax = sb.histplot(data = df_data, x = df_data.cmc, kde=True, color='Green') #lento e ha problemi
+        #ax = sb.histplot(data = df_data, x = df_data.cmc, kde=True, color='Green', stat='count', discrete=True, hue="set_name")
+
+        if(finish - start > 10):
+            #ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            fig_px.update_layout(title = f'General cost of mana from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
-            ax = plt.xlim(-1, df_data.cmc.max())
-        ax = plt.xticks(np.arange(0,16))
+            #ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]}')
+            fig_px.update_layout(title = f'General cost of mana from {str(df_data.released_at.min())[0:4]}')
+        #ax = plt.xlabel('General cost of mana')
+        #ax = plt.ylabel('Amount')
+
+        #if df_data.cmc.max() > 16:
+        #    ax = plt.xlim(-1, 16)
+        #else:
+        #    ax = plt.xlim(-1, df_data.cmc.max())
+        #ax = plt.xticks(np.arange(0,16))
         
-        st.pyplot(fig)
-        #nel primi 3 anni cercano molte più carte a costo 1
+        #st.pyplot(fig)
+        st.write(fig_px)
 
     total = st.checkbox('Total')
 
     if total:
 
-        fig,ax = plt.subplots(figsize=(15,6))
+        #fig,ax = plt.subplots(figsize=(15,6))
         mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
-        df_data = final_df[mask]
+        df_data = final_df[mask & (final_df.cmc != 1000000.0)]
 
-        ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
-        #PROVARE A SOSTITUIRE IL BAR CON GLI SCATTER (ES: NORMAL DISTRIBUTION)
+        prova_ge= df_data.cmc.value_counts().sort_index()
+
+        #ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
+        fig_px = px.line(x = prova_ge.index, y = prova_ge, labels = {'x':'Cost of mana', 'y':'Amount'})
 
         if(finish != start):
-            ax = plt.title(f'General cost of mana from {start} to {finish}')
+            #ax = plt.title(f'General cost of mana from {start} to {finish}')
+            fig_px.update_layout(title = f'General cost of mana from {start} to {finish}')
         else:
-            ax = plt.title(f'General cost of mana from {start}')
+            #ax = plt.title(f'General cost of mana from {start}')
+            fig_px.update_layout(title = f'General cost of mana from {start}')
 
-        ax = plt.xlabel('General cost of mana')
-        ax = plt.ylabel('Amount')
+        #ax = plt.xlabel('General cost of mana')
+        #ax = plt.ylabel('Amount')
 
-        if df_data.cmc.max() > 16:
-            ax = plt.xlim(-1, 16)
-        else:
-            ax = plt.xlim(-1, df_data.cmc.max())
-        ax = plt.xticks(np.arange(0,16))
+        #if df_data.cmc.max() > 16:
+        #    ax = plt.xlim(-1, 16)
+        #else:
+        #    ax = plt.xlim(-1, df_data.cmc.max())
+        #ax = plt.xticks(np.arange(0,16))
         
-        st.pyplot(fig)
+        #st.pyplot(fig)
+        st.write(fig_px)
         
 
 if attribut == 'power':
@@ -779,7 +790,8 @@ if attribut == 'text':
     #cerco solo creature
     for x in list_mask_data:
 
-        fig,ax= plt.subplots(figsize=(20,6))
+        #fig,ax= plt.subplots(figsize=(20,6))
+        fig,ax= plt.subplots()
         df_data = final_df[x]
 
         lista_keywords_ability = {'deathtouch':0,'defender':0,'double strike':0,'enchant':0,'equip':0, 'fear':0,'first strike':0, 'flash':0, 'flying':0, 'haste':0, 'hexproof':0, 'indestructible':0, 'landwalk':0,'lifelink':0, 'menace':0, 'protection':0, 'prowess':0, 'reach':0, 'shroud':0, 'trample':0, 'vigilance':0, 'ward':0} #più comuni
@@ -795,17 +807,29 @@ if attribut == 'text':
                     lista_keywords_ability[chiave] += 1
 
         frequence = pd.Series(lista_keywords_ability.values(),index = lista_keywords_ability.keys())
-        word_text = WordCloud().generate_from_frequencies((frequence))
+        word_text = WordCloud(background_color="white").generate_from_frequencies((frequence))
 
-        ax = plt.imshow(word_text, interpolation='bilinear')
+        ax = plt.imshow(word_text)
         
         if (finish - start > 10):
-            ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            #ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            st.write(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
-            ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
-        ax = plt.axis("off")
+            #ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
+            st.write(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
         
-        st.pyplot(fig)
+        ax = plt.axis("off")
+
+        #aggiunta col
+        col_df, col_word = st.columns([1,3])
+
+        with col_df:
+            st.write(frequence.sort_values(ascending=False))
+        
+        with col_word:
+            st.pyplot(fig)
+        
+        #st.pyplot(fig)
 
     total = st.checkbox('Total')
 
@@ -824,23 +848,36 @@ if attribut == 'text':
                 if chiave in testo.casefold():
                     lista_keywords_ability[chiave] += 1
         
-        fig,ax = plt.subplots(figsize=(20,6))
+        #fig,ax = plt.subplots(figsize=(20,6))
+        fig,ax = plt.subplots()
+        
         #ax = plt.bar(lista_keywords_ability.keys(),lista_keywords_ability.values()) #ok bar char orribile
         #ax = addlabels(lista_keywords_ability.keys(),lista_keywords_ability.values(),limite=30000)
 
         #provo ad usare worldcloud
         frequence = pd.Series(lista_keywords_ability.values(),index = lista_keywords_ability.keys())
-        word_text = WordCloud().generate_from_frequencies((frequence))
+        word_text = WordCloud(background_color="white").generate_from_frequencies((frequence))
 
-        ax = plt.imshow(word_text, interpolation='bilinear')
+        #ax = plt.imshow(word_text, interpolation='bilinear')
+        ax = plt.imshow(word_text)
         
         if (finish != start):
-            ax = plt.title(f'Frequenci of keywords from {start} to {finish}')
+            #ax = plt.title(f'Frequenci of keywords from {start} to {finish}')
+            st.write(f'Frequenci of keywords from {start} to {finish}')
         else:
-            ax = plt.title(f'Frequenci of keywords from {start}')
+            #ax = plt.title(f'Frequenci of keywords from {start}')
+            st.write(f'Frequenci of keywords from {start}')
 
         ax = plt.axis("off")
-        st.pyplot(fig)
+
+        col_df, col_word = st.columns([1,3])
+
+        with col_df:
+            st.write(frequence.sort_values(ascending=False))
+        with col_word:
+            st.pyplot(fig)
+
+        #st.pyplot(fig)
 
 if attribut == 'artist':
 
@@ -854,9 +891,9 @@ if attribut == 'artist':
         #fig_px.update_layout(uniformtext_minsize=12, uniformtext_mode='hide') 
 
         if (finish - start > 10):
-            st.write(f'number od illustration for artist from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            st.write(f'Number of illustration for artist from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
-            st.write(f'number od illustration for artist from {str(df_data.released_at.min())[0:4]}')
+            st.write(f'Number of illustration for artist from {str(df_data.released_at.min())[0:4]}')
         
         col_df, col_don = st.columns([1,3])
         
@@ -878,9 +915,9 @@ if attribut == 'artist':
         fig_px.update_traces(textposition='inside')
 
         if (finish != start):
-            st.write(f'number od illustration for artist from {start} to {finish}')
+            st.write(f'Number of illustration for artist from {start} to {finish}')
         else:
-            st.write(f'number od illustration for artist from {start}')
+            st.write(f'Number of illustration for artist from {start}')
 
         col_df, col_don = st.columns([1,3])
         
