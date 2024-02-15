@@ -397,7 +397,7 @@ if attribut == 'types':
 
     if total:
 
-        fig,ax = plt.subplots(figsize = (15,6))
+        fig,ax = plt.subplots(figsize = (20,6))
         mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
         df_data = final_df[mask]
 
@@ -409,15 +409,15 @@ if attribut == 'types':
                 list_amount_type[y] = amount
         
         #ax = plt.bar(list_amount_type.keys(),list_amount_type.values())
-        ax = sb.barplot(x=list(list_amount_type.keys()), y=list_amount_type.values(), hue=list(list_amount_type.keys()))
+        ax = sb.barplot(x=list(list_amount_type.keys()), y=list_amount_type.values(), hue=list(list_amount_type.keys()), hue_order=lista_main_types)
 
         for x in ax.containers:
             ax.bar_label(x,)
 
-        if(finish-start > 10):
-            ax = plt.title(f'Amount of type from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            ax = plt.title(f'Amount of type from {start} to {finish}')
         else:
-            ax = plt.title(f'Amount of type from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Amount of type from {start}')
         ax = plt.xlabel('Type of cards')
         ax = plt.ylabel('Amount')
 
@@ -461,10 +461,10 @@ if attribut == 'general cost of mana': #fare curva di mana (normal distribution)
         ax = plt.bar(df_data.cmc.value_counts(sort=False).index,df_data.cmc.value_counts(sort=False)) #non mi piace sortato
         #PROVARE A SOSTITUIRE IL BAR CON GLI SCATTER (ES: NORMAL DISTRIBUTION)
 
-        if(finish - start > 10):
-            ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            ax = plt.title(f'General cost of mana from {start} to {finish}')
         else:
-            ax = plt.title(f'General cost of mana from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'General cost of mana from {start}')
 
         ax = plt.xlabel('General cost of mana')
         ax = plt.ylabel('Amount')
@@ -513,10 +513,10 @@ if attribut == 'power':
         for x in ax.containers:
             ax.bar_label(x,)
 
-        if(finish - start > 10):
-            ax = plt.title(f'Cards power from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            ax = plt.title(f'Cards power from {start} to {finish}')
         else:
-            ax = plt.title(f'Cards power from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Cards power from {start}')
         ax = plt.xlabel('Power')
         ax = plt.ylabel('Amount')
         
@@ -557,10 +557,10 @@ if attribut == 'toughness':
         for x in ax.containers:
             ax.bar_label(x,)
 
-        if(finish -start > 10):
-            ax = plt.title(f'Cards toughness from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            ax = plt.title(f'Cards toughness from {start} to {finish}')
         else:
-            ax = plt.title(f'Cards toughness from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Cards toughness from {start}')
         ax = plt.xlabel('Toughness')
         ax = plt.ylabel('Amount')
 
@@ -571,47 +571,55 @@ if attribut == 'reserved':
     #diviso per periodo, carte reserved
     for x in list_mask_data: #prima scorro le date
         
-        fig,ax = plt.subplots(figsize = (4,4))
+        #fig,ax = plt.subplots(figsize = (4,4))
         df_data = final_df[x] #mi salvo il dataframe con la mask data
-        
+        fig_px = px.pie(values = df_data.reserved.value_counts(), names = df_data.reserved.value_counts().index)
+
         #plt.bar(df_data.reserved.value_counts().index,df_data.reserved.value_counts()) #non mi piace sortato
-        if True in df_data.reserved.value_counts().index:
-            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%', colors=['red', 'green']) #non posso usare explod nel caso non sia presente un true
-        else:
-            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%', colors='red') #non posso usare explod nel caso non sia presente un true
+        #if True in df_data.reserved.value_counts().index:
+            #ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%', colors=['red', 'green']) #non posso usare explod nel caso non sia presente un true
+        #else:
+            #ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%', colors='red') #non posso usare explod nel caso non sia presente un true
         
         if(finish - start > 10):
-            ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            #ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            fig_px.update_layout(title = f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
-            ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]}')
+            #ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]}')
+            fig_px.update_layout(title = f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]}')
 
-        st.pyplot(fig)
+        #st.pyplot(fig)
+        st.write(fig_px)
     
     total = st.checkbox('Total')
 
     if total:
 
-        fig,ax = plt.subplots(figsize = (4,4))
+        #fig,ax = plt.subplots(figsize = (4,4))
         mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
         df_data = final_df[mask]
+        fig_px = px.pie(values = df_data.reserved.value_counts(), names = df_data.reserved.value_counts().index)
 
         #plt.bar(df_data.reserved.value_counts().index,df_data.reserved.value_counts()) #non mi piace sortato
-        if True in df_data.reserved.value_counts().index:
-            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%', colors=['red', 'green']) #non posso usare explod nel caso non sia presente un true
-        else:
-            ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%', colors='red') #non posso usare explod nel caso non sia presente un true
+        #if True in df_data.reserved.value_counts().index:
+            #ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index,explode=(0,0.5), autopct='%1.2f%%', colors=['red', 'green']) #non posso usare explod nel caso non sia presente un true
+        #else:
+            #ax = plt.pie(df_data.reserved.value_counts(),labels=df_data.reserved.value_counts().index, autopct='%1.2f%%', colors='red') #non posso usare explod nel caso non sia presente un true
         
-        if(finish - start > 10):
-            ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            #ax = plt.title(f'Percentage of reserved cards from {start} to {finish}')
+            fig_px.update_layout(title = f'Percentage of reserved cards from {start} to {finish}')
         else:
-            ax = plt.title(f'Percentage of reserved cards from {str(df_data.released_at.min())[0:4]}')
+            #ax = plt.title(f'Percentage of reserved cards from {start}')
+            fig_px.update_layout(title = f'Percentage of reserved cards from {start}')
 
-        st.pyplot(fig)
+        #st.pyplot(fig)
+        st.write(fig_px)
 
 
 if attribut == 'color identity': #fare la stessa cosa con COLORS
     
-    color_cid = {'Green':'green','Red':'red','Blue':'blu','Black':'black','White':'white','Multicolor':'rainbow','Colorless':'gray'}
+    color_cid = {'Green':'green','Red':'red','Blue':'blu','Black':'black','White':'white','Multicolor':'orange','Colorless':'gray'}
 
     for x in list_mask_data:
         
@@ -636,27 +644,30 @@ if attribut == 'color identity': #fare la stessa cosa con COLORS
 
     if total:
         
-        fig,ax = plt.subplots(figsize = (15,6))
+        #fig,ax = plt.subplots(figsize = (15,6))
         mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
         df_data = final_df[mask]
-        
         count_colorid = count_color_identity(df_data)
         
         #fig,ax = plt.subplots(figsize = (6,6))
-        ax = plt.pie(count_colorid.values(), labels=count_colorid.keys(), autopct='%.2f',colors=['Black','White','Green','Red','Blue','Grey','Orange'], pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2))
-        
-        if(finish - start > 10):
-            ax = plt.title (f'Percentage color identity from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        #ax = plt.pie(count_colorid.values(), labels=count_colorid.keys(), autopct='%.2f',colors=['Black','White','Green','Red','Blue','Grey','Orange'], pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2))
+        fig_px = px.pie(values = count_colorid.values(), names = count_colorid.keys(), color = count_colorid.keys(), color_discrete_map= color_cid)
+
+        if(finish != start):
+            #ax = plt.title (f'Percentage color identity from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            fig_px.update_layout(title = f'Percentage color identity from {start} to {finish}')
         else:
-            ax = plt.title (f'Percentage color identity from {str(df_data.released_at.min())[0:4]}')
+            #ax = plt.title (f'Percentage color identity from {str(df_data.released_at.min())[0:4]}')
+            fig_px.update_layout(title = f'Percentage color identity from {start}')
         
-        st.pyplot(fig)
+        #st.pyplot(fig)
+        st.write(fig_px)
 
 if attribut == 'legalities':
 
     #da finire!!!!!
 
-    color_le = {'legacy':'blue','duel':'red','vintage':'green','commander':'purple','penny':'orange','modern':'yellow','pauper':'pink','pioneer':'gray','historic':'black','standard':'magenta','future':'magma','brawl':'turbid','oldschool':'fall'}
+    color_le = {'legacy':'brown','duel':'red','vintage':'darkorange','commander':'gold','penny':'olive','modern':'lime','pauper':'turquoise','pioneer':'darkcyan','historic':'slategray','standard':'royalblues','future':'violet','brawl':'crimson','oldschool':'pink'}
 
     for x in list_mask_data:
 
@@ -667,7 +678,7 @@ if attribut == 'legalities':
         #ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True)
         
         #if i want to use px i have to use fig and st.write
-        fig_px = px.pie(values =count_legalities.values(), names= count_legalities.keys(), color=color_le) 
+        fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le) 
 
         if(finish - start > 10):
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
@@ -690,14 +701,14 @@ if attribut == 'legalities':
         #fig,ax = plt.subplots(figsize = (6,6))
         
         #ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2))
-        fig_px = px.pie(values =count_legalities.values(), names= count_legalities.keys(), color=color_le) 
+        fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le) 
 
-        if(finish - start > 10):
+        if(finish != start):
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            fig_px.update_layout(title = f'Percentage cards legality from {start} to {finish}')
         else:
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
+            fig_px.update_layout(title = f'Percentage cards legality from {start}')
 
         #st.pyplot(fig)
         st.write(fig_px)
@@ -753,10 +764,10 @@ if attribut == 'subtypes':
         fig,ax = plt.subplots(figsize=(10,6))
         ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
 
-        if(finish - start > 10):
-            ax = plt.title(f'Amount of subtype from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if(finish != start):
+            ax = plt.title(f'Amount of subtype from {start} to {finish}')
         else:
-            ax = plt.title(f'Amount of subtype from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Amount of subtype from {start}')
 
         st.pyplot(fig)
 
@@ -823,10 +834,10 @@ if attribut == 'text':
 
         ax = plt.imshow(word_text, interpolation='bilinear')
         
-        if (finish - start > 10):
-            ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        if (finish != start):
+            ax = plt.title(f'Frequenci of keywords from {start} to {finish}')
         else:
-            ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Frequenci of keywords from {start}')
 
         ax = plt.axis("off")
         st.pyplot(fig)
@@ -835,21 +846,51 @@ if attribut == 'artist':
 
     for x in list_mask_data:
 
-        fig,ax= plt.subplots() #capire che grafico usare
+        #fig,ax= plt.subplots() #capire che grafico usare
         df_data = final_df[x]
+        
+        fig_px = px.pie(values = df_data.artist.value_counts(), names=df_data.artist.value_counts().index, hole=.3)
+        fig_px.update_traces(textposition='inside')
+        #fig_px.update_layout(uniformtext_minsize=12, uniformtext_mode='hide') 
 
-        st.write(f'number od illustration for artist from {df_data.released_at.min()} to {df_data.released_at.max()}')
-        st.write(df_data.artist.value_counts())
+        if (finish - start > 10):
+            st.write(f'number od illustration for artist from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        else:
+            st.write(f'number od illustration for artist from {str(df_data.released_at.min())[0:4]}')
+        
+        col_df, col_don = st.columns([1,3])
+        
+        with col_df:
+            st.write(df_data.artist.value_counts())
+        
+        with col_don:
+            st.write(fig_px)
     
     total = st.checkbox('Total')
 
     if total: #start and finish totale
 
-        fig,ax = plt.subplots() #capire se inserire grafico
+        #fig,ax = plt.subplots() #capire se inserire grafico
         mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
         df_data = final_df[mask]
-        st.write(f'number od illustration for artist from {df_data.released_at.min()} to {df_data.released_at.max()}')
-        st.write(df_data.artist.value_counts())
+
+        fig_px = px.pie(values = df_data.artist.value_counts(), names = df_data.artist.value_counts().index, hole=.3)
+        fig_px.update_traces(textposition='inside')
+
+        if (finish != start):
+            st.write(f'number od illustration for artist from {start} to {finish}')
+        else:
+            st.write(f'number od illustration for artist from {start}')
+
+        col_df, col_don = st.columns([1,3])
+        
+        with col_df:
+            st.write(df_data.artist.value_counts())
+        
+        with col_don:
+            #st.write('prova, INSERIRE IMMAGINE')
+            st.write(fig_px)
+    
 
 st.subheader('Model')
 
