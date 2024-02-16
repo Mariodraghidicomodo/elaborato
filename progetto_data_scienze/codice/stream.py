@@ -291,6 +291,59 @@ if st.checkbox('Show final data'):
     data_load_final_state = st.text('Loading data...')
     st.write(all_str) #Could not convert 'no image' with type str: tried to convert to int64, perchè in multiversid ci sono liste con int e str, quindi uso astype(str)
     data_load_final_state.text('Done')
+    
+    if st.checkbox('Columns information'):
+        st.markdown("""
+                    id:\n 
+                    oracle_id:\n
+                    multiverse_ids: Code to display card images; if it is equal to -1, the image is not available.\n
+                    name: Name of the card.\n
+                    lang: The language of the card.\n
+                    released_at: When the card was published.\n
+                    layout:\n
+                    highres_image: If there is a high-resolution image available.\n
+                    mana_cost:\n
+                    cmc:\n
+                    power: The strength of the card, a key attribute for creature-type cards.\n
+                    toughness: The constitution of the card, a key characteristic for creature-type cards.\n
+                    colors:\n
+                    color_identity:\n
+                    legalities: In what format the card is playable or not.\n
+                    games:\n
+                    reserved: Whether there is a possibility that the card will be reprinted or not.\n
+                    foil: If there is a foil version of the card.\n
+                    nonfoil:\n
+                    oversize:\n
+                    promo:\n
+                    reprint: if the card was reprinted.\n
+                    variation:\n
+                    set:\n
+                    set_name: The name of the set where the card is present.\n
+                    set_type: Type of the set\n
+                    collector_number:\n
+                    digital:\n
+                    rarity: The rarity of the card, indicating how likely it is to be found. \n
+                    flavor_text:\n
+                    artist: The name of the artist who illustrated the card.\n
+                    border_color:\n
+                    frame:\n
+                    full_art:\n
+                    textless:\n
+                    booster:\n
+                    story_spotlight:\n
+                    all_parts: All the cards needed to perform a combo.\n
+                    loyalty: Statistics for the card type 'Planeswalker,' indicated in the text with a number in curly brackets and is a type of counter.\n
+                    printings: In which other sets the card has been printed.\n
+                    rulings:\n
+                    subtypes:\n
+                    supertypes:\n
+                    text:\n
+                    type:\n
+                    types:\n
+                    uuid:\n
+                    edhrecRank: Rank for commander format.\n
+                    leadershipSkills: The Leadership Skills Data Model describes the properties of formats that a card is legal to be your Commander in play formats that utilize Commanders.\n
+                    prices:\n""")
 
 #SEARCH IMAGE
 st.header('Card')
@@ -300,7 +353,7 @@ st.markdown("""With this tool, you can search for the name of a card. On the lef
 
 card = st.selectbox('Insert name of the card',options=name_cards(final_df),index = 6, key='name_card') #find the multiverse_id
 #card = st.selectbox('Insert name of the card',options=list_select_card,index = 6, key='name_card') #find the multiverse_id
-print('card:',card )
+#print('card:',card )
 list_card_info = search_card(card,final_df) #PROVARE A MODIFICARE
 
 
@@ -310,7 +363,8 @@ with col_img:
         
         st.image(f'http://gatherer.wizards.com/Handlers/Image.ashx?multiverseid={list_card_info[0]}&type=card',use_column_width="always")
     else:
-        st.write('no image found')
+        #st.write('no image found')
+        st.image(image = 'no_image.jpg', use_column_width=True)
 with col_info:
     info = list_card_info[1]
     #st.write(info[['name','released_at','layout','mana_cost','power','toughness','rarity','flavor_text','type','subtypes','text','prices']].T)
@@ -318,13 +372,21 @@ with col_info:
 
 #AGGIUNGERE UN SEARCH IMAGE AVANZATO
 
-#PLOT
-st.header('Plot')
+st.header('Correlation')
 
 if st.checkbox('Show correlation'):
     fig,ax = plt.subplots()
-    ax = sb.heatmap(final_df.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5)
+    ax = sb.heatmap(final_df.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5, cmap='Greens')
     st.pyplot(fig)
+    st.markdown("""Observing the image, we can conclude that there are no significant correlations, except for the correlation between promo and non-foil cards. Non-foil cards are typically not present in promo sets/cards.""")
+
+#PLOT
+st.header('Plot')
+
+#if st.checkbox('Show correlation'):
+    #fig,ax = plt.subplots()
+    #ax = sb.heatmap(final_df.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5)
+    #st.pyplot(fig)
 
 
 #SELECT PERIOD
@@ -355,8 +417,16 @@ if attribut == 'number of card': #le date sono sbagliate perche?
             ax = plt.title(f'Amount of cards from {str(df_data.released_at.min())[0:4]}')
         ax =plt.ylabel('Amount')
         ax = plt.xlabel('Period')
-        ax = plt.bar(df_data.released_at.value_counts().index,df_data.released_at.value_counts(), width=3)
+        #ax = plt.bar(df_data.released_at.value_counts().index,df_data.released_at.value_counts(), width=3)
         
+        order_pr = df_data.released_at.value_counts().sort_index()
+        
+        ax = sb.barplot(x = order_pr.index, y = order_pr) #DA FINIRE I TITOLI
+        for x in ax.containers:
+            ax.bar_label(x,)
+        
+        ax.tick_params(rotation = 90)
+
         st.pyplot(fig_nc)
         
 
@@ -680,49 +750,101 @@ if attribut == 'legalities':
 
     color_le = {'legacy':'brown','duel':'red','vintage':'darkorange','commander':'gold','penny':'olive','modern':'lime','pauper':'turquoise','pioneer':'darkcyan','historic':'slategray','standard':'royalblues','future':'violet','brawl':'crimson','oldschool':'pink'}
 
-    for x in list_mask_data:
+    format = st.selectbox(label = 'Select a format', options=color_le.keys())
+
+    if format in color_le.keys():
+            
+        for x in list_mask_data:
+
+            #fig,ax = plt.subplots(figsize = (15,6))
+            df_data = final_df[x]
+            count_legalities = count_legal_cards(df_data)
+
+            perc = {}
+            perc[format] = count_legalities[format]
+            perc[f'no {format}'] = len(df_data) - count_legalities[format] #totale carte - carte legali nel formato
+
+            fig_px = px.pie(values = perc.values(), names = perc.keys(), color = perc.keys())
+
+            if(finish - start > 10):
+                #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+                fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            else:
+                #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
+                fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
+            
+            st.write(fig_px)
+        
+        total = st.checkbox('Total')
+
+        if total:
+
+            mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+            df_data = final_df[mask]
+            count_legalities = count_legal_cards(df_data)
+
+            perc = {}
+            perc[format] = count_legalities[format]
+            perc[f'no {format}'] = len(df_data) - count_legalities[format] #totale carte - carte legali nel formato
+
+            #fig,ax = plt.subplots(figsize = (6,6))
+            
+            #ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2))
+            fig_px = px.pie(values = perc.values(), names = perc.keys(), color = perc.keys())
+
+            if(finish != start):
+                #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+                fig_px.update_layout(title = f'Percentage cards legality from {start} to {finish}')
+            else:
+                #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
+                fig_px.update_layout(title = f'Percentage cards legality from {start}')
+
+            #st.pyplot(fig)
+            st.write(fig_px)
+
+    #for x in list_mask_data:
 
         #fig,ax = plt.subplots(figsize = (15,6))
-        df_data = final_df[x]
-        count_legalities = count_legal_cards(df_data)
+        #df_data = final_df[x]
+        #count_legalities = count_legal_cards(df_data)
 
         #ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True)
         
         #if i want to use px i have to use fig and st.write
-        fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le) 
+        #fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le)  
 
-        if(finish - start > 10):
+        #if(finish - start > 10):
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-        else:
+        #    fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+        #else:
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
+        #    fig_px.update_layout(title = f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
 
         #st.pyplot(fig)
-        st.write(fig_px)
+        #st.write(fig_px)
 
-    total = st.checkbox('Total')
+    #total = st.checkbox('Total')
 
-    if total:
+    #if total:
 
-        mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
-        df_data = final_df[mask]
-        count_legalities = count_legal_cards(df_data)
+    #    mask = final_df['released_at'].between(f'{start}-01-01',f'{finish}-12-31')
+    #    df_data = final_df[mask]
+    #    count_legalities = count_legal_cards(df_data)
 
         #fig,ax = plt.subplots(figsize = (6,6))
         
         #ax = plt.pie(count_legalities.values(), labels=count_legalities.keys(), autopct='%.2f',pctdistance= 1.3, shadow=True, explode=(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2))
-        fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le) 
+    #    fig_px = px.pie(values = count_legalities.values(), names= count_legalities.keys(), color = count_legalities.keys(), color_discrete_map = color_le) 
 
-        if(finish != start):
+    #    if(finish != start):
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {start} to {finish}')
-        else:
+    #        fig_px.update_layout(title = f'Percentage cards legality from {start} to {finish}')
+    #    else:
             #ax = plt.title (f'Percentage cards legality from {str(df_data.released_at.min())[0:4]}')
-            fig_px.update_layout(title = f'Percentage cards legality from {start}')
+    #        fig_px.update_layout(title = f'Percentage cards legality from {start}')
 
         #st.pyplot(fig)
-        st.write(fig_px)
+    #    st.write(fig_px)
 
 if attribut == 'subtypes':
 
@@ -929,7 +1051,7 @@ if attribut == 'artist':
             st.write(fig_px)
     
 
-st.subheader('Model')
+st.header('Model')
 
 model = st.checkbox('Show model')
 
@@ -966,6 +1088,13 @@ if model:
     df_prices_paper['price_paper'] = lista_prezzi_paper
     df_prices_paper_unique = df_prices_paper.drop_duplicates('name')
     prova_predict = df_prices_paper_unique.copy()
+
+    #corr_prova_predict = st.checkbox('Show prova')
+
+    #if corr_prova_predict:
+    #    fig,ax = plt.subplots()
+    #    ax = sb.heatmap(prova_predict.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5)
+    #    st.pyplot(fig)
 
     #from list/dict to string
     list_colonne_to_string = ['printings','legalities']
