@@ -5,7 +5,7 @@ import numpy as np
 
 #DC AllCards
 
-allcards_df = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllCards.json").T
+allcards_df = pd.read_json("progetto_data_scienze/codice/AllCards.json").T
 allcards_df_bu = allcards_df.copy()
 
 allcards_df.drop('hasNoDeckLimit',axis=1,inplace=True)
@@ -32,7 +32,8 @@ allcards_df.loc[allcards_df[(allcards_df.name == 'Squidnapper')].index, 'toughne
 allcards_clean_df = allcards_df.copy()
 
 #DC AllPrices
-allprices_df = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllPrices.json").T
+
+allprices_df = pd.read_json("progetto_data_scienze/codice/AllPrices.json").T
 allprices_df_bu = allprices_df
 #doesn't have any null value
 
@@ -41,7 +42,8 @@ allprices_clean_df = allprices_df.copy()
 
 #DC Artwork_cards
 
-artwork_cards_df = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/scryfall-artwork-cards.json")
+
+artwork_cards_df = pd.read_json("progetto_data_scienze/codice/scryfall-artwork-cards.json")
 artwork_cards_df_bu = artwork_cards_df.copy()
 
 artwork_cards_df.drop(columns='tcgplayer_id', inplace=True)

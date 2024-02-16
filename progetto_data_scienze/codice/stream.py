@@ -22,17 +22,6 @@ import warnings
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import plotly.express as px
 
-#df
-#final_df = pd.read_json('final_json.json')
-#allprices_df = pd.read_json(
-#    "C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllPrices.json"
-#).T
-#allcards_df = pd.read_json(
-#    "C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllCards.json"
-#).T
-#artwork_cards_df = pd.read_json(
-#    "C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/scryfall-artwork-cards.json"
-#)
 
 #2 dataframe
 #normal df
@@ -57,22 +46,22 @@ import plotly.express as px
     #the cached value will be none-the-wiser.
 @st.cache_data
 def allprices_load():
-    data = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllPrices.json").T
+    data = pd.read_json("AllPrices.json").T
     return data
 
 @st.cache_data
 def allcards_load():
-    data = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/AllCards.json").T
+    data = pd.read_json("AllCards.json").T
     return data
 
 @st.cache_data
 def artwork_cards_load():
-    data = pd.read_json("C:/Users/elped/OneDrive/Documenti/hello_django/progetto_data_scienze/data_base/mtg/scryfall-artwork-cards.json")
+    data = pd.read_json("scryfall-artwork-cards.json")
     return data
 
 @st.cache_data
 def final_load():
-    data = pd.read_json("C:/Users/elped/OneDrive/Desktop/git_vs_code/prova-elab-ing/progetto_data_scienze/codice/final_json.json")
+    data = pd.read_json("final_json.json")
     return data
 
 #@st.cache_data
