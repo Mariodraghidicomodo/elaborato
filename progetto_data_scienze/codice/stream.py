@@ -294,56 +294,56 @@ if st.checkbox('Show final data'):
     
     if st.checkbox('Columns information'):
         st.markdown("""
-                    id:\n 
-                    oracle_id:\n
+                    id: Unique identifier of the card.\n 
+                    oracle_id: A unique ID for this card’s oracle identity. This value is consistent across reprinted card editions, and unique among different cards with the same name.\n
                     multiverse_ids: Code to display card images; if it is equal to -1, the image is not available.\n
                     name: Name of the card.\n
                     lang: The language of the card.\n
                     released_at: When the card was published.\n
-                    layout:\n
+                    layout: The layout property categorizes the arrangement of card parts, faces, and other bounded regions on cards. The layout can be used to programmatically determine which other properties on a card you can expect.\n
                     highres_image: If there is a high-resolution image available.\n
-                    mana_cost:\n
-                    cmc:\n
+                    mana_cost: specifies how much and what type of mana needs to spend to play the card.\n
+                    cmc: specifies how much mana needs to spend to play the card without the type of mana.\n
                     power: The strength of the card, a key attribute for creature-type cards.\n
                     toughness: The constitution of the card, a key characteristic for creature-type cards.\n
-                    colors:\n
-                    color_identity:\n
+                    colors: List of type of mana present in the mana_cost.\n
+                    color_identity: List of type of mana present in the mana cost and in the text box.\n
                     legalities: In what format the card is playable or not.\n
-                    games:\n
+                    games: A list of games that this card print is available in, paper, arena, and/or mtgo.\n
                     reserved: Whether there is a possibility that the card will be reprinted or not.\n
                     foil: If there is a foil version of the card.\n
-                    nonfoil:\n
-                    oversize:\n
-                    promo:\n
+                    nonfoil: If there is a foil version of the card.\n
+                    oversize: True if this card is oversized.\n
+                    promo: True if this card is a promotional print.\n
                     reprint: if the card was reprinted.\n
-                    variation:\n
-                    set:\n
+                    variation: Whether this card is a variation of another printing.\n
+                    set: Set_name code.\n
                     set_name: The name of the set where the card is present.\n
-                    set_type: Type of the set\n
-                    collector_number:\n
-                    digital:\n
+                    set_type: Type of the set.\n
+                    collector_number: This card’s collector number.\n
+                    digital: True if this card was only released in a video game.\n
                     rarity: The rarity of the card, indicating how likely it is to be found. \n
-                    flavor_text:\n
+                    flavor_text: flavor text is always the bottom-most and italicized in the text box and has no functionality on the cards except during acorn games.\n
                     artist: The name of the artist who illustrated the card.\n
-                    border_color:\n
-                    frame:\n
-                    full_art:\n
-                    textless:\n
-                    booster:\n
-                    story_spotlight:\n
+                    border_color: This card’s border color: black, white, borderless, silver, or gold.\n
+                    frame: General appearance of the card.\n
+                    full_art: True if this card’s artwork is larger than normal.\n
+                    textless: True if the card is printed without text.\n
+                    booster: Whether this card is found in boosters.\n
+                    story_spotlight: True if this card is a Story Spotlight.\n
                     all_parts: All the cards needed to perform a combo.\n
                     loyalty: Statistics for the card type 'Planeswalker,' indicated in the text with a number in curly brackets and is a type of counter.\n
                     printings: In which other sets the card has been printed.\n
-                    rulings:\n
-                    subtypes:\n
-                    supertypes:\n
-                    text:\n
-                    type:\n
-                    types:\n
-                    uuid:\n
-                    edhrecRank: Rank for commander format.\n
+                    rulings: Additional rules of the card.\n
+                    subtypes: subtype is just a method of categorization with no rules specific to them, though other cards may refer to subtypes or are dependent on subtypes.\n
+                    supertypes: supertype gives additional game rules for the card.\n
+                    text: Contains all relvant rules text as well all possible flavor text.\n
+                    type: To the left of the center box of the card is the card type, possibly preceded by one or more supertype and/or followed by one or more supertypes. The type specifies when and how a card can be played.\n
+                    types: List of all type of the card.\n
+                    uuid: Universal unique identifier for the name of the card.\n
+                    edhrecRank: This card’s overall rank/popularity on EDHREC. Not all cards are ranked.\n
                     leadershipSkills: The Leadership Skills Data Model describes the properties of formats that a card is legal to be your Commander in play formats that utilize Commanders.\n
-                    prices:\n""")
+                    prices: An object containing daily price information for this card.\n""")
 
 #SEARCH IMAGE
 st.header('Card')
