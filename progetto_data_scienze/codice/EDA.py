@@ -29,5 +29,3 @@ artwork_cards_df.shape
 artwork_cards_df.columns
 artwork_cards_df.isna().sum()
 #artwork_cards_df.describe()
-
-#EDA MERGE!!!!!!!!!

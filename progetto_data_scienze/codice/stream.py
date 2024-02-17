@@ -689,7 +689,7 @@ if attribut == 'reserved':
 
 if attribut == 'color identity': #fare la stessa cosa con COLORS
     
-    color_cid = {'Green':'green','Red':'red','Blue':'blu','Black':'black','White':'white','Multicolor':'orange','Colorless':'gray'}
+    color_cid = {'Green':'green','Red':'red','Blue':'blu','Black':'black','White':'yellow','Multicolor':'orange','Colorless':'gray'}
 
     for x in list_mask_data:
         
@@ -857,9 +857,9 @@ if attribut == 'subtypes':
         ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
         
         if(finish - start > 10):
-            ax = plt.title(f'Amount of subtype from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            ax = plt.title(f'Top 10 subtype from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
-            ax = plt.title(f'Amount of subtype from {str(df_data.released_at.min())[0:4]}')
+            ax = plt.title(f'Top 10 subtype from {str(df_data.released_at.min())[0:4]}')
         
         st.pyplot(fig)
 
@@ -887,9 +887,9 @@ if attribut == 'subtypes':
         ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
 
         if(finish != start):
-            ax = plt.title(f'Amount of subtype from {start} to {finish}')
+            ax = plt.title(f'Top 10 subtype from {start} to {finish}')
         else:
-            ax = plt.title(f'Amount of subtype from {start}')
+            ax = plt.title(f'Top 10 subtype from {start}')
 
         st.pyplot(fig)
 
@@ -1107,7 +1107,7 @@ if model:
     pred.dropna(inplace=True)
 
     #training the model
-    column_test = ['rarity','price_paper','cmc','power','toughness','reprint','printings_string','set_name','legalities_string','reserved']
+    column_test = ['rarity','cmc','power','toughness','reprint','printings_string','set_name','legalities_string','reserved']
     X = pred[column_test]
     y = pred.price_paper
 
@@ -1115,8 +1115,9 @@ if model:
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8,test_size=0.2, random_state=0) #capire test size e random state
 
     #train the model
-    #regr = RandomForestRegressor(n_estimators=10, max_depth=10, random_state = 101) #capire
-    regr = RandomForestRegressor(n_estimators=100, max_depth=10,  oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
+    #regr = RandomForestRegressor(n_estimators=100, max_depth=10, random_state = 101) #capire
+    #regr = RandomForestRegressor(n_estimators=100, max_depth=10,  oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
+    regr = RandomForestRegressor(n_estimators=100, min_samples_split = 2 , min_samples_leaf= 1 , oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
     regr.fit(X_train, y_train.values.ravel())
 
     #make prediction
@@ -1140,7 +1141,7 @@ if model:
     st.write("Out-of-Bag Score: ", round(oob_score, 2))
     
     #grafico
-    #st.write('inserire grafico, CAPIRE SE VA BENE')
+    #st.write('inserire grafico')
     fig,ax = plt.subplots()
     #st.write(y_test)
     #st.write(X_test)

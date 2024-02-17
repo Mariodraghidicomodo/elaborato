@@ -2,6 +2,7 @@ progetto_data_scienze/data_base/
 .venv
 el_ing_sw
 progetto_data_scienze/codice/final_json.json
+progetto_data_scienze/codice/final_json_test.json
 progetto_data_scienze/codice/final.csv
 final_json.json
 progetto_data_scienze/codice/scryfall-artwork-cards.json
