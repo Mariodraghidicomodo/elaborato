@@ -102,7 +102,7 @@ def name_cards(df): # PROVARE A PASSARLE TUTTE, INSIEME ALL'ACRONIMO DEL SET
 
 #search id for image
 def search_card(name,df): #rimettere apposto
-    multiids = df[(df.name == name) & (df.multiverse_ids.isin([[-1]]) == False)].head(1) #AIUTO è COME SE IL LA COLONNA MULTIIDS FOSSE DIVENTATA UNA STRINGA NON SO PERCHè, ma può essere che non ha gli scope!!??
+    multiids = df[(df.name == name) & (df.multiverse_ids.isin([[-1]]) == False)].head(1)
     print(multiids.multiverse_ids)
     if multiids.empty == True:
         return ['no image',df[df.name == name].head(1)]
@@ -391,7 +391,7 @@ print(list_mask_data)
 #SELECT ATTRBUTE
 attribut = st.selectbox(label='Select an attribute', options=['number of card','types','general cost of mana','color identity','power','toughness','reserved','legalities','subtypes','text','artist'])
 
-if attribut == 'number of card': #le date sono sbagliate perche?
+if attribut == 'number of card':
     
     for x in list_mask_data:
         
@@ -410,7 +410,7 @@ if attribut == 'number of card': #le date sono sbagliate perche?
         
         order_pr = df_data.released_at.value_counts().sort_index()
         
-        ax = sb.barplot(x = order_pr.index, y = order_pr) #DA FINIRE I TITOLI
+        ax = sb.barplot(x = order_pr.index, y = order_pr)
         for x in ax.containers:
             ax.bar_label(x,)
         
@@ -734,8 +734,6 @@ if attribut == 'color identity': #fare la stessa cosa con COLORS
         st.write(fig_px)
 
 if attribut == 'legalities':
-
-    #da finire!!!!!
 
     color_le = {'legacy':'brown','duel':'red','vintage':'darkorange','commander':'gold','penny':'olive','modern':'lime','pauper':'turquoise','pioneer':'darkcyan','historic':'slategray','standard':'royalblues','future':'violet','brawl':'crimson','oldschool':'pink'}
 
