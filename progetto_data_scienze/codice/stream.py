@@ -221,19 +221,19 @@ def count_legal_cards(df):
 
 
 
-def count_subtypes(search_subtype): #ok perfetto, lo modifico e ritorno un count, non posso la lista la devo ritrasformare in un dizio
-    lista_indici = []
-    count = 0
-    for index,tipo in final_clean_df.subtypes.items():
-        if search_subtype in tipo:
-            count += 1
-            lista_indici.append(index)
-    return count
+#def count_subtypes(search_subtype): #ok perfetto, lo modifico e ritorno un count, non posso la lista la devo ritrasformare in un dizio
+#    lista_indici = []
+#    count = 0
+#    for index,tipo in final_clean_df.subtypes.items():
+#        if search_subtype in tipo:
+#            count += 1
+#            lista_indici.append(index)
+#    return count
 
-def color_type(type):
-    for tipo in type.keys:
-        print(tipo)
-    return #DA FINIRE
+#def color_type(type):
+#    for tipo in type.keys:
+#        print(tipo)
+#    return #DA FINIRE
 
 
 
@@ -291,8 +291,8 @@ if st.checkbox('Show final data'):
                     released_at: When the card was published.\n
                     layout: The layout property categorizes the arrangement of card parts, faces, and other bounded regions on cards. The layout can be used to programmatically determine which other properties on a card you can expect.\n
                     highres_image: If there is a high-resolution image available.\n
-                    mana_cost: specifies how much and what type of mana needs to spend to play the card.\n
-                    cmc: specifies how much mana needs to spend to play the card without the type of mana.\n
+                    mana_cost: Specifies how much and what type of mana needs to spend to play the card.\n
+                    cmc: Specifies how much mana needs to spend to play the card without the type of mana.\n
                     power: The strength of the card, a key attribute for creature-type cards.\n
                     toughness: The constitution of the card, a key characteristic for creature-type cards.\n
                     colors: List of type of mana present in the mana_cost.\n
@@ -304,7 +304,7 @@ if st.checkbox('Show final data'):
                     nonfoil: If there is a foil version of the card.\n
                     oversize: True if this card is oversized.\n
                     promo: True if this card is a promotional print.\n
-                    reprint: if the card was reprinted.\n
+                    reprint: If the card was reprinted.\n
                     variation: Whether this card is a variation of another printing.\n
                     set: Set_name code.\n
                     set_name: The name of the set where the card is present.\n
@@ -312,7 +312,7 @@ if st.checkbox('Show final data'):
                     collector_number: This card’s collector number.\n
                     digital: True if this card was only released in a video game.\n
                     rarity: The rarity of the card, indicating how likely it is to be found. \n
-                    flavor_text: flavor text is always the bottom-most and italicized in the text box and has no functionality on the cards except during acorn games.\n
+                    flavor_text: Flavor text is always the bottom-most and italicized in the text box and has no functionality on the cards except during acorn games.\n
                     artist: The name of the artist who illustrated the card.\n
                     border_color: This card’s border color: black, white, borderless, silver, or gold.\n
                     frame: General appearance of the card.\n
@@ -324,8 +324,8 @@ if st.checkbox('Show final data'):
                     loyalty: Statistics for the card type 'Planeswalker,' indicated in the text with a number in curly brackets and is a type of counter.\n
                     printings: In which other sets the card has been printed.\n
                     rulings: Additional rules of the card.\n
-                    subtypes: subtype is just a method of categorization with no rules specific to them, though other cards may refer to subtypes or are dependent on subtypes.\n
-                    supertypes: supertype gives additional game rules for the card.\n
+                    subtypes: Subtype is just a method of categorization with no rules specific to them, though other cards may refer to subtypes or are dependent on subtypes.\n
+                    supertypes: Supertype gives additional game rules for the card.\n
                     text: Contains all relvant rules text as well all possible flavor text.\n
                     type: To the left of the center box of the card is the card type, possibly preceded by one or more supertype and/or followed by one or more supertypes. The type specifies when and how a card can be played.\n
                     types: List of all type of the card.\n
@@ -368,6 +368,7 @@ if st.checkbox('Show correlation'):
     ax = sb.heatmap(final_df.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5, cmap='Greens')
     st.pyplot(fig)
     st.markdown("""Observing the image, we can conclude that there are no significant correlations, except for the correlation between promo and non-foil cards. Non-foil cards are typically not present in promo sets/cards.""")
+    st.markdown("""vedo che ci sono alcune variabili altamente correlate sia positivamente sia negaticamente correlazioni ma non so bene come interpretarli perchè sono booleani """)
 
 #PLOT
 st.header('Plot')
@@ -852,7 +853,11 @@ if attribut == 'subtypes':
         #dizi_subtype = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
         dizi_subtype = dict(sorted(dizi_subtype.items(), key = lambda item: item[1], reverse=True)[0:10])
 
-        ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        #ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        #CONTROLLARE
+        ax = sb.barplot(x=list(dizi_subtype.keys()), y=dizi_subtype.values(), hue=list(dizi_subtype.keys()), hue_order=dizi_subtype)
+        for x in ax.containers:
+            ax.bar_label(x,)
         
         if(finish - start > 10):
             ax = plt.title(f'Top 10 subtype from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
