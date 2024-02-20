@@ -367,8 +367,7 @@ if st.checkbox('Show correlation'):
     fig,ax = plt.subplots()
     ax = sb.heatmap(final_df.corr(numeric_only=True),annot=True, fmt=".1f", linewidth=.5, cmap='Greens')
     st.pyplot(fig)
-    st.markdown("""Observing the image, we can conclude that there are no significant correlations, except for the correlation between promo and non-foil cards. Non-foil cards are typically not present in promo sets/cards.""")
-    st.markdown("""vedo che ci sono alcune variabili altamente correlate sia positivamente sia negaticamente correlazioni ma non so bene come interpretarli perchè sono booleani """)
+    st.markdown("""Observing the image, we can conclude that some variables are highly correlated both positively and negatively, such as nonfoil and booster, promo and nonfoil, or highers_image and digital. I have decided not to represent them with a plot because, being all boolean variables, i am unsure how to interpret them""")
 
 #PLOT
 st.header('Plot')
@@ -1056,7 +1055,7 @@ if model:
     #st.write('spiegazione modello, aggiungere cosa può influenzare il prezzo')
     st.write("""I have decided to implement a prediction model for card price in the project.
             The main factors influencing their cost are: rarity, legality, reprints, the number
-            of copies the player needs, th condition of the card (not implemented) and 
+            of copies the player needs, the condition of the card and 
             how much the card can impact the game.
             Unfortunately, some elements that influence the price were not available in 
             the dataset, so i attempt to include other variables sucha as strenght,
@@ -1122,9 +1121,9 @@ if model:
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.8,test_size=0.2, random_state=0) #capire test size e random state
 
     #train the model
-    #regr = RandomForestRegressor(n_estimators=100, max_depth=10, random_state = 101) #capire
-    #regr = RandomForestRegressor(n_estimators=100, max_depth=10,  oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
-    regr = RandomForestRegressor(n_estimators=100, min_samples_split = 2 , min_samples_leaf= 1 , oob_score=True) #capire, disolito negli esmpi mettono n_estimators come 10, max_depth non ce e random_state = 0
+    #regr = RandomForestRegressor(n_estimators=100, max_depth=10,  oob_score=True) 
+    regr = RandomForestRegressor(n_estimators=100, min_samples_split = 2 , min_samples_leaf= 1 , oob_score=True)
+    #regr = RandomForestRegressor(n_estimators=1800, min_samples_split = 10 , min_samples_leaf= 2, max_features='sqrt', max_depth= 30 , oob_score=True) #colab hyperparameter tuning random forest; {'n_estimators': 1800,'min_samples_split': 10,'min_samples_leaf': 2,'max_features': 'sqrt','max_depth': 30,'bootstrap': True}
     regr.fit(X_train, y_train.values.ravel())
 
     #make prediction
@@ -1163,6 +1162,13 @@ if model:
     ax.set_title('Card prices and predictions')
 
     st.pyplot(fig)
+
+    st.markdown("""As could hypothesized form the absence of some important data
+                such as the number of cards the player needs or the condition of the cards
+                and how much the card can impact the game, the model does not perform well,
+                as also indicate by the R2 score. In general, some price are predicted well, while 
+                others are significantly above the normal price. On average, the mean absolute error for 
+                the predicted prices is approximately $1.90""")
 
 
 
