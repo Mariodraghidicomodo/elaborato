@@ -19,3 +19,5 @@ Repository:
   - EDA.py: file containing the eda for the 3 datasets
   - EDA_merge.py: file containing the eda for the merge dataset
   - stream.py: file for the presentation on streamlit
+
+Link datasets: https://www.kaggle.com/datasets/mylesoneill/magic-the-gathering-cards
