@@ -836,7 +836,6 @@ if attribut == 'legalities':
 
 if attribut == 'subtypes':
 
-    #DA FINIRE
     lista_subtypes = create_lista_subtypes(final_df)
     lista_subtypes.sort()
 
@@ -852,10 +851,11 @@ if attribut == 'subtypes':
         #dizi_subtype
         #dizi_subtype = sorted(dizi_subtype.items(), key=lambda x: x[1], reverse=True)[0:10] #i primi 10 più frequnti subtype
         dizi_subtype = dict(sorted(dizi_subtype.items(), key = lambda item: item[1], reverse=True)[0:10])
+        #dizi_subtype = dizi_subtype
 
         #ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
         #CONTROLLARE
-        ax = sb.barplot(x=list(dizi_subtype.keys()), y=dizi_subtype.values(), hue=list(dizi_subtype.keys()), hue_order=dizi_subtype)
+        ax = sb.barplot(x=list(dizi_subtype.keys()), y=dizi_subtype.values(), hue=list(dizi_subtype.keys()), hue_order=dizi_subtype) #colore per frequenza
         for x in ax.containers:
             ax.bar_label(x,)
         
@@ -887,7 +887,11 @@ if attribut == 'subtypes':
         #    x +=1
 
         fig,ax = plt.subplots(figsize=(10,6))
-        ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        
+        #ax = plt.bar(dizi_subtype.keys(), dizi_subtype.values())
+        ax = sb.barplot(x=list(dizi_subtype.keys()), y=dizi_subtype.values(), hue=list(dizi_subtype.keys()), hue_order=dizi_subtype) #colore per frequenza
+        for x in ax.containers:
+            ax.bar_label(x,)
 
         if(finish != start):
             ax = plt.title(f'Top 10 subtype from {start} to {finish}')
@@ -927,10 +931,10 @@ if attribut == 'text':
         
         if (finish - start > 10):
             #ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
-            st.write(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
+            st.write(f'Frequency of keywords from {str(df_data.released_at.min())[0:4]} to {str(df_data.released_at.max())[0:4]}')
         else:
             #ax = plt.title(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
-            st.write(f'Frequenci of keywords from {str(df_data.released_at.min())[0:4]}')
+            st.write(f'Frequency of keywords from {str(df_data.released_at.min())[0:4]}')
         
         ax = plt.axis("off")
 
@@ -1144,13 +1148,19 @@ if model:
     st.write("Out-of-Bag Score: ", round(oob_score, 2))
     
     #grafico
-    #st.write('inserire grafico')
+    
     fig,ax = plt.subplots()
-    #st.write(y_test)
-    #st.write(X_test)
+    
     sort_result = result.sort_index()[450:500]
-    ax = plt.scatter(sort_result.index,sort_result.paper_price, color='blue')
-    ax = plt.plot(sort_result.index, sort_result.prediction, color = 'red')
+    
+    price = ax.scatter(sort_result.index,sort_result.paper_price, color='blue', label = 'price')
+    pred = plt.plot(sort_result.index, sort_result.prediction, color = 'red', label = 'prediction')
+    #print(price)
+    #print(pred)
+    ax.legend(handles=[price,pred[0]])
+    ax.set_xlabel('Card number')
+    ax.set_ylabel('Price')
+    ax.set_title('Card prices and predictions')
 
     st.pyplot(fig)
 
