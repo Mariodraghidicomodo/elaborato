@@ -1,4 +1,4 @@
-Project data scienze
+Project data science
 
 This is my final project for programming. I have analyzed three datasets containing information about the cards from the physical game Magic: The Gathering. the project is structured into various components:
 - Exploring the datasets
